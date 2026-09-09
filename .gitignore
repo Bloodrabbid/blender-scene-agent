@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+
+# The built extension. It ships from Releases, not from the tree.
+scene_agent.zip

@@ -1,0 +1,91 @@
+schema_version = "1.0.0"
+
+id = "blender_scene_agent"
+version = "1.5.50"
+name = "Scene Agent"
+tagline = "Drive Blender from your own Claude Code or Codex CLI"
+maintainer = "Local build"
+type = "add-on"
+
+blender_version_min = "5.1.0"
+license = ["SPDX:GPL-3.0-or-later"]
+platforms = ["macos-arm64", "macos-x64", "windows-x64", "linux-x64"]
+
+# One development-friendly package contains every platform wheel. Blender only
+# installs the wheels compatible with the current OS and Python ABI.
+wheels = [
+  "./wheels/annotated_types-0.7.0-py3-none-any.whl",
+  "./wheels/anyio-4.14.2-py3-none-any.whl",
+  "./wheels/attrs-26.1.0-py3-none-any.whl",
+  "./wheels/blender_mcp-1.0.0-py3-none-any.whl",
+  "./wheels/certifi-2026.6.17-py3-none-any.whl",
+  "./wheels/click-8.4.2-py3-none-any.whl",
+  "./wheels/docutils-0.23-py3-none-any.whl",
+  "./wheels/h11-0.16.0-py3-none-any.whl",
+  "./wheels/httpcore-1.0.9-py3-none-any.whl",
+  "./wheels/httpx-0.28.1-py3-none-any.whl",
+  "./wheels/httpx_sse-0.4.3-py3-none-any.whl",
+  "./wheels/idna-3.18-py3-none-any.whl",
+  "./wheels/jsonschema-4.26.0-py3-none-any.whl",
+  "./wheels/jsonschema_specifications-2025.9.1-py3-none-any.whl",
+  "./wheels/mcp-1.28.1-py3-none-any.whl",
+  "./wheels/pydantic-2.13.4-py3-none-any.whl",
+  "./wheels/pydantic_core-2.46.4-cp313-cp313-macosx_10_12_x86_64.whl",
+  "./wheels/pydantic_core-2.46.4-cp313-cp313-macosx_11_0_arm64.whl",
+  "./wheels/pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+  "./wheels/pydantic_core-2.46.4-cp313-cp313-win_amd64.whl",
+  "./wheels/pydantic_core-2.46.4-cp314-cp314-macosx_10_12_x86_64.whl",
+  "./wheels/pydantic_core-2.46.4-cp314-cp314-macosx_11_0_arm64.whl",
+  "./wheels/pydantic_core-2.46.4-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+  "./wheels/pydantic_core-2.46.4-cp314-cp314-win_amd64.whl",
+  "./wheels/pydantic_settings-2.14.2-py3-none-any.whl",
+  "./wheels/pyjwt-2.13.0-py3-none-any.whl",
+  "./wheels/pywin32-312-cp313-cp313-win_amd64.whl",
+  "./wheels/pywin32-312-cp314-cp314-win_amd64.whl",
+  "./wheels/python_dotenv-1.2.2-py3-none-any.whl",
+  "./wheels/python_multipart-0.0.32-py3-none-any.whl",
+  "./wheels/pyyaml-6.0.3-cp313-cp313-macosx_10_13_x86_64.whl",
+  "./wheels/pyyaml-6.0.3-cp313-cp313-macosx_11_0_arm64.whl",
+  "./wheels/pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+  "./wheels/pyyaml-6.0.3-cp313-cp313-win_amd64.whl",
+  "./wheels/pyyaml-6.0.3-cp314-cp314-macosx_10_13_x86_64.whl",
+  "./wheels/pyyaml-6.0.3-cp314-cp314-macosx_11_0_arm64.whl",
+  "./wheels/pyyaml-6.0.3-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+  "./wheels/pyyaml-6.0.3-cp314-cp314-win_amd64.whl",
+  "./wheels/referencing-0.37.0-py3-none-any.whl",
+  "./wheels/rpds_py-2026.6.3-cp313-cp313-macosx_10_12_x86_64.whl",
+  "./wheels/rpds_py-2026.6.3-cp313-cp313-macosx_11_0_arm64.whl",
+  "./wheels/rpds_py-2026.6.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+  "./wheels/rpds_py-2026.6.3-cp313-cp313-win_amd64.whl",
+  "./wheels/rpds_py-2026.6.3-cp314-cp314-macosx_10_12_x86_64.whl",
+  "./wheels/rpds_py-2026.6.3-cp314-cp314-macosx_11_0_arm64.whl",
+  "./wheels/rpds_py-2026.6.3-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+  "./wheels/rpds_py-2026.6.3-cp314-cp314-win_amd64.whl",
+  "./wheels/skia_python-144.0.post2-cp313-cp313-macosx_11_0_arm64.whl",
+  "./wheels/skia_python-144.0.post2-cp313-cp313-macosx_11_0_x86_64.whl",
+  "./wheels/skia_python-144.0.post2-cp313-cp313-manylinux_2_28_x86_64.whl",
+  "./wheels/skia_python-144.0.post2-cp313-cp313-win_amd64.whl",
+  "./wheels/skia_python-144.0.post2-cp314-cp314-macosx_11_0_arm64.whl",
+  "./wheels/skia_python-144.0.post2-cp314-cp314-macosx_11_0_x86_64.whl",
+  "./wheels/skia_python-144.0.post2-cp314-cp314-manylinux_2_28_x86_64.whl",
+  "./wheels/skia_python-144.0.post2-cp314-cp314-win_amd64.whl",
+  "./wheels/sse_starlette-3.4.6-py3-none-any.whl",
+  "./wheels/starlette-1.3.1-py3-none-any.whl",
+  "./wheels/typing_extensions-4.16.0-py3-none-any.whl",
+  "./wheels/typing_inspection-0.4.2-py3-none-any.whl",
+  "./wheels/uvicorn-0.51.0-py3-none-any.whl",
+]
+
+[permissions]
+# The only listener is the execution bridge on 127.0.0.1; the agent CLI is a
+# child process on this machine and reaches the network on its own account.
+network = "Listen on localhost so the bundled MCP server can drive Blender"
+files = "Read and write scene files and the agent's working directory"
+
+# Keep agent notes and pin lists out of the installable zip.
+[build]
+paths_exclude_pattern = [
+  "__pycache__/",
+  "**/AGENTS.md",
+  "/requirements-*.txt",
+]

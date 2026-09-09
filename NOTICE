@@ -1,0 +1,41 @@
+Scene Agent
+===========
+
+This program is free software under the GNU General Public License v3.0 or
+later. See LICENSE for the full text.
+
+Derived work
+------------
+
+Scene Agent is a fork of the Higgsfield Blender add-on ("higgsfield_blender"
+1.5.50), Copyright (C) 2026 Higgsfield Inc., released under GPL-3.0-or-later.
+Most of the viewport UI — the Skia renderer (`skui/`), the widget vocabulary
+(`hfui/`), the composer and chat surfaces, and the supporting plumbing — is
+their work, and the per-file `SPDX-FileCopyrightText` headers name them as the
+copyright holders of those parts. Those notices must stay: the licence that
+permits this fork is the same licence that requires the attribution.
+
+What this fork changes is the ownership of the agent. The upstream add-on
+signed in to a Higgsfield account and drove Blender from their hosted agent.
+This fork removes the account entirely — the OAuth device flow, the token on
+disk, the SDK client, the outbound bridge to their MCP worker, the Amplitude
+telemetry, the auto-updater and every feature that billed against a Higgsfield
+balance — and answers the same chat with a coding CLI running on the user's own
+machine.
+
+Bundled third-party code
+------------------------
+
+* `mcp_bridge/` and the bundled `blender_mcp` (`blmcp`) wheel are the work of
+  the Blender Authors, GPL-3.0-or-later. `mcp_bridge/` is adapted from Blender
+  Lab's `blender_mcp_addon`.
+* The Python wheels under `wheels/` are unmodified upstream releases; see
+  THIRD_PARTY_NOTICES.md for the ones with notable licences.
+
+Trademarks
+----------
+
+"Higgsfield" is a trademark of Higgsfield Inc. This project is not affiliated
+with, endorsed by, or supported by them. The name appears in this repository
+only where it is factually necessary: the copyright notices the licence
+requires, and the notes explaining what was removed and why.
