@@ -13,7 +13,6 @@ import bpy
 
 from ...blender.viewport import request_redraw
 from ...hfui import composer as composer_module
-from ...props import props as _props
 from ...work import add_report
 from .mount import (
     _hide_bar,
@@ -27,15 +26,7 @@ from .mount import (
     generate_3d_overlay_state,
     modal_breaker,
 )
-from .binding import (
-    AGENT_READABLE_SUFFIXES,
-    _COMPOSER_IMAGE_SUFFIXES,
-    _COMPOSER_MEDIA_HINT,
-    _COMPOSER_MEDIA_SUFFIXES,
-    _composer_binding,
-    _composer_add_image_paths,
-    _composer_media_kind,
-)
+from .binding import AGENT_READABLE_SUFFIXES
 
 
 # Where an OS file drag is hovering, or None. The FileHandler writes this from
@@ -178,28 +169,17 @@ class SCENEAGENT_OT_add_composer_images(bpy.types.Operator):
     )
 
     def invoke(self, context, event):
-        # Offer every media kind the selected model accepts.
+        # A drop lands here, not in `execute`: Blender calls a file handler's
+        # import operator through invoke, with the paths already filled in.
+        # Without this the operator ignored them and opened a file browser
+        # asking for the file that had just been dragged onto the prompt —
+        # from the outside, dragging a picture in did nothing at all.
+        if self.filepath or len(self.files) > 0:
+            return self.execute(context)
         surface = composer_surface_module()
-        scene_builder = self.mode == composer_module.SCENE_BUILDER or (
-            not self.mode
-            and surface.state().mode == composer_module.SCENE_BUILDER
+        self.filter_glob = ";".join(
+            "*" + suffix for suffix in sorted(surface.scene_builder_image_suffixes())
         )
-        retexture = self.mode == composer_module.RETEXTURE or (
-            not self.mode and surface.state().mode == composer_module.RETEXTURE
-        )
-        if retexture:
-            suffixes = _COMPOSER_IMAGE_SUFFIXES
-        elif scene_builder:
-            suffixes = surface.scene_builder_image_suffixes()
-        else:
-            binding = _composer_binding(_props(context), self.mode or None)
-            suffixes = set().union(
-                *(
-                    _COMPOSER_MEDIA_SUFFIXES[_composer_media_kind(item)]
-                    for item in binding.media_items()
-                )
-            )
-        self.filter_glob = ";".join("*" + suffix for suffix in sorted(suffixes))
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
@@ -216,25 +196,14 @@ class SCENEAGENT_OT_add_composer_images(bpy.types.Operator):
                 raise RuntimeError("Can't attach here.")
             if dest == "chat":
                 added = chat_surface_module().attach(paths)
-            elif dest in {"scene", "composer"}:
-                added = composer_surface_module().attach_drop(paths, dest)
             else:
-                surface = composer_surface_module()
-                scene_builder = self.mode == composer_module.SCENE_BUILDER or (
-                    not self.mode
-                    and surface.state().mode == composer_module.SCENE_BUILDER
-                )
-                retexture = self.mode == composer_module.RETEXTURE or (
-                    not self.mode
-                    and surface.state().mode == composer_module.RETEXTURE
-                )
-                if retexture:
-                    added = surface.attach_retexture(paths)
-                elif scene_builder:
-                    added = surface.attach_scene_builder(paths)
-                else:
-                    binding = _composer_binding(_props(context), self.mode or None)
-                    added = _composer_add_image_paths(binding, paths)
+                # No `dest` means the + button rather than a drop. There is one
+                # prompt to attach to, so it means what dropping on it means —
+                # and going through `attach_drop` is what pins the card open
+                # and drops the measurement caches. Calling the staging
+                # function directly staged the file and left the card the size
+                # it was, which looked like the button had done nothing.
+                added = composer_surface_module().attach_drop(paths, "scene")
         except Exception as error:
             self.report({"ERROR"}, str(error))
             add_report(str(error), type="ERROR")

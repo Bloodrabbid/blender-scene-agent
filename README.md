@@ -34,7 +34,9 @@ you would rather see the bridge status and the setup for your own terminal.
 ## Attaching images
 
 Drag a PNG, JPG, GIF, WEBP or PDF out of the Finder and onto the prompt: it
-becomes a chip, and the `+` button opens a file picker for the same thing. The
+becomes a chip. `Cmd/Ctrl+V` does the same for a picture on the clipboard —
+a screenshot you just took, or a file copied in a file manager — and the `+`
+button opens a file picker. The
 path travels with your question and your CLI opens it where it lies — nothing
 is uploaded anywhere. "Match this reference", "build what is in this photo",
 "the colours from this frame" all work.

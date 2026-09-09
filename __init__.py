@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Scene Agent",
     "author": "Scene Agent contributors",
-    "version": (1, 0, 0),
+    "version": (1, 0, 1),
     "blender": (5, 1, 0),
     "location": "View3D > Sidebar (N) > Scene Agent",
     "description": "Drive Blender from your own Claude Code or Codex CLI.",

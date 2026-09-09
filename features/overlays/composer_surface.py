@@ -2084,6 +2084,14 @@ def key_event(hb, event):
             _sync_element_query(hb)
             _composer.field.claimed.add(event.type)
             return True
+        # PRESS only: holding Cmd+V repeats, and clipboard image data is
+        # written to a fresh file each time it is read — a held key would
+        # stack copies of one picture.
+        if letter == "V" and event.value == "PRESS" and _paste_media(hb):
+            # Only when the clipboard actually held one. Otherwise fall
+            # through and let the field paste text, as it always has.
+            _composer.field.claimed.add(event.type)
+            return True
 
     if event.value in {"PRESS", "REPEAT"} and event.type in {"BACK_SPACE", "DEL"}:
         removed, selected = _delete_object_context(binding)
@@ -2557,10 +2565,34 @@ def _copy_thread():
     return True
 
 
+def _paste_media(hb):
+    """Cmd+V holding a picture rather than words. True if it was handled.
+
+    Tried before the text paste, never instead of it. The clipboard holds text
+    almost every time, and when it does this costs one question to the OS and
+    answers no — see `features.clipboard_media`, which is where the platforms
+    differ and where the reasons are.
+    """
+    from ..clipboard_media import clipboard_paths
+
+    found = clipboard_paths()
+    if not found:
+        return False
+    try:
+        attach_drop(found, "scene")
+    except Exception as error:
+        # The clipboard held a file and the prompt will not take it. Saying so
+        # is the answer; pasting its path as text would not be.
+        hb.add_report(str(error), type="ERROR")
+    return True
+
+
 def _paste_into_prompt(hb):
     hb.generate_3d_overlay_state["prompt_active"] = True
     state().pinned = True
     _clear_thread_select()
+    if _paste_media(hb):
+        return True
     return paste_clipboard(hb)
 
 
