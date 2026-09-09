@@ -45,6 +45,12 @@ Those five formats are the whole list because they are what the CLI can
 actually read. A BMP, a TIFF or an MP4 is refused at the drop rather than
 accepted and then failed halfway through a turn.
 
+If an attachment does not arrive, the add-on says why in its log —
+`~/Library/Logs/SceneAgent/Blender/blender.log` on macOS, the same folder
+Preferences → Support Logs opens. Every line about this is tagged
+`area=attach`: `drop_hover` is a drag passing over the prompt, `picker_*` is
+the file browser, `paste_media` is `Cmd+V` finding a picture.
+
 ## Preferences worth knowing
 
 **Extra models.** The picker ships the current aliases — `opus`, `sonnet`,

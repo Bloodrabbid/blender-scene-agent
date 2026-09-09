@@ -26,7 +26,7 @@ import sys
 import time
 from pathlib import Path
 
-from .. import paths
+from .. import diagnostics, paths
 
 #: A clipboard read is on the main thread between a key press and a redraw.
 #: Long enough for a cold `osascript`, short enough that a wedged helper is a
@@ -117,6 +117,7 @@ end run"""
 
 def _mac_paths():
     advertised = _run(["osascript", "-e", "clipboard info"])
+    diagnostics.event("attach", "clipboard_flavours", offered=advertised[:200])
     if "«class furl»" in advertised:
         found = _existing(_run(["osascript", "-e", _MAC_FILE]))
         if found:

@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "blender_scene_agent"
-version = "1.0.1"
+version = "1.0.2"
 name = "Scene Agent"
 tagline = "Drive Blender from your own Claude Code or Codex CLI"
 maintainer = "Local build"

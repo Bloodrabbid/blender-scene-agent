@@ -26,7 +26,7 @@ import uuid
 from pathlib import Path
 from types import SimpleNamespace
 
-from ... import hfui, media, perf, skui
+from ... import diagnostics, hfui, media, perf, skui
 from ...work import add_report, run_async, run_on_main_thread
 from .. import agent, conversation, scene_history
 from ...hfui import composer as composer_module
@@ -1656,6 +1656,29 @@ def scene_builder_image_suffixes():
     return _SCENE_MEDIA_SUFFIXES
 
 
+def _choose_scene_images():
+    """Open Blender's file browser on the prompt's own attachments.
+
+    Through a timer rather than straight from here. This runs inside the
+    overlay's modal handler, and a file browser started from inside a running
+    modal operator does not get the window it needs — the browser never
+    appears and the click reads as a dead button, which is what *Upload* was.
+    """
+    import bpy
+
+    def open_browser():
+        try:
+            bpy.ops.scene_agent.add_composer_images("INVOKE_DEFAULT")
+        except Exception as error:
+            diagnostics.event("attach", "upload_failed", error=str(error))
+        return None
+
+    diagnostics.event("attach", "upload_clicked")
+
+    bpy.app.timers.register(open_browser, first_interval=0.0)
+    return True
+
+
 def _capture_scene_builder(hb, source):
     """Attach a viewport or scene-camera capture to Scene Builder."""
     import bpy
@@ -1669,7 +1692,10 @@ def _capture_scene_builder(hb, source):
             if camera is None:
                 raise RuntimeError("Choose a scene camera before rendering.")
         path = render_viewport_to_file(camera=camera)
-        attach_scene_builder([path])
+        # `attach_drop`, not `attach_scene_builder`: the tray has to be
+        # measured again or the card keeps the height it had and the capture
+        # is staged where nobody can see it.
+        attach_drop([path], "scene")
     except Exception as error:
         hb.add_report(str(error), type="ERROR")
         return False
@@ -2578,6 +2604,7 @@ def _paste_media(hb):
     found = clipboard_paths()
     if not found:
         return False
+    diagnostics.event("attach", "paste_media", files=len(found), first=found[0])
     try:
         attach_drop(found, "scene")
     except Exception as error:
@@ -4213,7 +4240,7 @@ def activate(hb, node_id, mx=None, my=None):
             )
             return True
         if node_id == "retexture:image":
-            hb._composer_choose_images(composer_module.RETEXTURE)
+            _choose_scene_images()
             return True
         if node_id == "retexture:uv":
             props.retexture_original_uv = not props.retexture_original_uv
@@ -4265,7 +4292,7 @@ def activate(hb, node_id, mx=None, my=None):
         return True
     if node_id == "reference":
         if binding.mode == "3d":
-            hb._composer_choose_images(binding.mode)
+            _choose_scene_images()
             return True
         _open_menu(
             "reference",
@@ -4463,7 +4490,7 @@ def _choose(hb, props, node_id):
         return
     if anchor == "scene-reference-add":
         if value == "UPLOAD":
-            hb._composer_choose_images(composer_module.SCENE_BUILDER)
+            _choose_scene_images()
         else:
             _capture_scene_builder(hb, value)
         return
@@ -4477,7 +4504,7 @@ def _choose(hb, props, node_id):
     binding = _binding(hb, props)
     if anchor == "reference":
         if value == "UPLOAD":
-            hb._composer_choose_images(binding.mode)
+            _choose_scene_images()
         else:
             hb._composer_add_reference_source(binding, value)
     elif anchor == "model":

@@ -11,6 +11,7 @@ import os
 
 import bpy
 
+from ... import diagnostics
 from ...blender.viewport import request_redraw
 from ...hfui import composer as composer_module
 from ...work import add_report
@@ -43,11 +44,20 @@ def os_drop_surface():
     return None
 
 
-def _remember_os_drop(dest):
+def _remember_os_drop(dest, detail=""):
+    """Latch where a live OS drag would land, and leave a breadcrumb.
+
+    The log line is here and not in the poll because the poll runs on every
+    mouse move of a drag, and only a change carries information. A drag that
+    never leaves ``None`` is exactly the report that comes back as "dragging
+    a picture in does nothing", and this is what says which of the three
+    reasons it was.
+    """
     global _os_drop
     if _os_drop == dest:
         return
     _os_drop = dest
+    diagnostics.event("attach", "drop_hover", dest=dest, detail=detail)
     request_redraw()
 
 
@@ -69,28 +79,30 @@ def _drop_region_xy(context):
 
 
 def _os_prompt_dest(context):
-    """Where dropping OS files at the pointer would attach, or ``None``.
+    """``(destination, why not)`` for dropping OS files at the pointer.
 
     ``refuse`` is a prompt that must swallow the drop so it does not land in
-    the scene behind the card, but cannot stage the file.
+    the scene behind the card, but cannot stage the file. The second half of
+    the answer is for the log: a drop that goes nowhere is indistinguishable
+    from a drop that was never offered, unless the reason is written down.
     """
     mx, my = _drop_region_xy(context)
     if mx is None:
-        return None
+        return None, "no-pointer-in-view3d"
     chat = chat_surface_module()
     if chat.pointer_over(mx, my) and chat.state().open:
-        return "chat"
+        return "chat", ""
     if not generate_3d_overlay_state.get("visible"):
-        return None
+        return None, "composer-not-installed"
     composer = composer_surface_module()
     if not composer.pointer_over(mx, my):
-        return None
+        return None, f"pointer-outside-card at {mx:.0f},{my:.0f}"
     current = composer.state()
     if current.camera is not None:
-        return "refuse"
+        return "refuse", "camera-card"
     if current.mode == composer_module.SCENE_BUILDER:
-        return "scene"
-    return "composer"
+        return "scene", ""
+    return "composer", ""
 
 
 class SCENEAGENT_OT_reset_overlay(bpy.types.Operator):
@@ -174,7 +186,9 @@ class SCENEAGENT_OT_add_composer_images(bpy.types.Operator):
         # Without this the operator ignored them and opened a file browser
         # asking for the file that had just been dragged onto the prompt —
         # from the outside, dragging a picture in did nothing at all.
-        if self.filepath or len(self.files) > 0:
+        dropped = bool(self.filepath) or len(self.files) > 0
+        diagnostics.event("attach", "picker_invoke", dropped=dropped)
+        if dropped:
             return self.execute(context)
         surface = composer_surface_module()
         self.filter_glob = ";".join(
@@ -190,7 +204,11 @@ class SCENEAGENT_OT_add_composer_images(bpy.types.Operator):
         if not paths and self.filepath:
             paths = [self.filepath]
         dest = _os_drop
-        _remember_os_drop(None)
+        _remember_os_drop(None, "consumed")
+        diagnostics.event(
+            "attach", "picker_execute", dest=dest, files=len(paths),
+            first=paths[0] if paths else "",
+        )
         try:
             if dest == "refuse":
                 raise RuntimeError("Can't attach here.")
@@ -227,11 +245,12 @@ class SCENEAGENT_FH_composer_images(bpy.types.FileHandler):
 
     @classmethod
     def poll_drop(cls, context):
-        if not (context.area and context.area.type == "VIEW_3D"):
-            _remember_os_drop(None)
+        area = getattr(context, "area", None)
+        if area is None or area.type != "VIEW_3D":
+            _remember_os_drop(None, f"area={getattr(area, 'type', None)}")
             return False
-        dest = _os_prompt_dest(context)
-        _remember_os_drop(dest)
+        dest, detail = _os_prompt_dest(context)
+        _remember_os_drop(dest, detail)
         return dest is not None
 
 
