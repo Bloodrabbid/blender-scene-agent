@@ -35,6 +35,7 @@ from . import CLIPBOARD
 from . import redraw_viewports
 from . import pump as pump_module
 from . import skia_runtime as sk
+from . import binding as binding_module
 from . import thread_viewport as thread_viewport_module
 
 # Text editing follows the host platform, not Blender: Cmd on macOS for
@@ -75,9 +76,11 @@ _RETEXTURE_JOB_TYPE = "meshy_v5_retexture"
 # cycles them. Spelled out rather than read off the RNA enum because this module
 # is bpy-free at module scope; the ids must match `props.cam_mode`.
 PHONECAM_MODES = (("WALK", "Walking"), ("FPV", "FPV"), ("MAP", "Map path"))
-_SCENE_MEDIA_SUFFIXES = (
-    _SCENE_IMAGE_SUFFIXES | media.VIDEO_SUFFIXES | media.FILE_SUFFIXES
-)
+# Not `_SCENE_IMAGE_SUFFIXES | media.VIDEO_SUFFIXES | media.FILE_SUFFIXES`
+# any more. That set was the hosted agent's: it uploaded media to a service
+# that transcoded it. This one hands a *path* to a CLI, so the question is
+# what that CLI can open — see `binding.AGENT_READABLE_SUFFIXES`.
+_SCENE_MEDIA_SUFFIXES = binding_module.AGENT_READABLE_SUFFIXES
 # Dynamic rows are measured synchronously only near the viewport. Tool rows are
 # exact without measurement; this budget applies to speculative overscan rows.
 _MEASURE_BUDGET = 0.003
@@ -1645,9 +1648,7 @@ def attach_scene_builder(paths):
                 _composer.scene_attachments.append(resolved)
                 added += 1
     if not added:
-        raise RuntimeError(
-            "Choose an image, a video (MP4, MOV, WEBM), or a PDF."
-        )
+        raise RuntimeError(binding_module.AGENT_READABLE_HINT)
     return added
 
 

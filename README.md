@@ -31,6 +31,18 @@ model you are paying for is the model you get.
 The prompt appears over the viewport on its own. Press `N` for the sidebar if
 you would rather see the bridge status and the setup for your own terminal.
 
+## Attaching images
+
+Drag a PNG, JPG, GIF, WEBP or PDF out of the Finder and onto the prompt: it
+becomes a chip, and the `+` button opens a file picker for the same thing. The
+path travels with your question and your CLI opens it where it lies — nothing
+is uploaded anywhere. "Match this reference", "build what is in this photo",
+"the colours from this frame" all work.
+
+Those five formats are the whole list because they are what the CLI can
+actually read. A BMP, a TIFF or an MP4 is refused at the drop rather than
+accepted and then failed halfway through a turn.
+
 ## Preferences worth knowing
 
 **Extra models.** The picker ships the current aliases — `opus`, `sonnet`,

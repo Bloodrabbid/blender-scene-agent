@@ -29,6 +29,17 @@ _COMPOSER_MEDIA_SUFFIXES = {
     "audio": _COMPOSER_AUDIO_SUFFIXES,
 }
 
+#: What the coding CLI can actually open when it is handed a path, and so the
+#: only thing the prompt will take: the four image formats the model can see,
+#: plus PDF. Checked against the CLI rather than assumed — a BMP comes back
+#: "not supported by vision system", a TIFF and an MP4 come back as binary it
+#: will not read. Accepting those made a chip whose only possible outcome was a
+#: failed tool row, which is worse than a drop that declines on the spot.
+AGENT_READABLE_SUFFIXES = frozenset(
+    {".png", ".jpg", ".jpeg", ".gif", ".webp", ".pdf"}
+)
+AGENT_READABLE_HINT = "Attach a PNG, JPG, GIF, WEBP or PDF — the CLI reads those."
+
 _COMPOSER_MEDIA_HINT = {
     "image": "That file is not an image.",
     "video": "That file is not a video.",

@@ -11,7 +11,6 @@ import os
 
 import bpy
 
-from ... import media
 from ...blender.viewport import request_redraw
 from ...hfui import composer as composer_module
 from ...props import props as _props
@@ -29,6 +28,7 @@ from .mount import (
     modal_breaker,
 )
 from .binding import (
+    AGENT_READABLE_SUFFIXES,
     _COMPOSER_IMAGE_SUFFIXES,
     _COMPOSER_MEDIA_HINT,
     _COMPOSER_MEDIA_SUFFIXES,
@@ -250,14 +250,11 @@ class SCENEAGENT_FH_composer_images(bpy.types.FileHandler):
     bl_idname = "SCENEAGENT_FH_composer_images"
     bl_label = "Drop References into the Composer"
     bl_import_operator = SCENEAGENT_OT_add_composer_images.bl_idname
-    bl_file_extensions = ";".join(
-        sorted(
-            _COMPOSER_IMAGE_SUFFIXES
-            | media.VIDEO_SUFFIXES
-            | media.AUDIO_SUFFIXES
-            | media.FILE_SUFFIXES
-        )
-    )
+    # Only what the prompt can actually do something with. Blender offers a
+    # drag to whichever handler claims the extension, so listing video here
+    # made the prompt light up for a file it was about to refuse — and while
+    # it was lit, Blender's own importers did not get the drop either.
+    bl_file_extensions = ";".join(sorted(AGENT_READABLE_SUFFIXES))
 
     @classmethod
     def poll_drop(cls, context):
